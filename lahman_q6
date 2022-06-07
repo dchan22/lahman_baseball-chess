@@ -5,8 +5,18 @@
 -- SELECT *
 -- FROM batting
 	
-SELECT namefirst,
-       namelast,
+-- SELECT namefirst,
+--        namelast,
+-- 	   CONCAT(ROUND((sb::numeric / (sb::numeric + cs::numeric)) * 100, 2), '%') AS successful_sb_percentage
+-- FROM batting
+-- 	   LEFT JOIN people
+-- 	   USING(playerid)
+-- 	   WHERE yearid = 2016
+-- 	   AND (sb + cs) > 20
+-- ORDER BY successful_sb_percentage DESC
+-- LIMIT 1;
+
+SELECT CONCAT(namefirst, ' ', namelast) AS player_name,
 	   CONCAT(ROUND((sb::numeric / (sb::numeric + cs::numeric)) * 100, 2), '%') AS successful_sb_percentage
 FROM batting
 	   LEFT JOIN people
