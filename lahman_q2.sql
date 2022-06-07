@@ -7,7 +7,7 @@ SELECT DISTINCT p.namefirst,
 				p.height, 
 				a.playerid, 
 				t.name
-FROM people AS p
+FROM people AS p 
 		LEFT JOIN appearances AS a ON a.playerid = p.playerid
 		LEFT JOIN teams AS t ON t.teamid = a.teamid
 WHERE height IN(SELECT MIN(height)
