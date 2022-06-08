@@ -57,7 +57,8 @@ FROM batting;
 
 
 
---Q9
+--Q9 Which managers have won the TSN Manager of the Year award in both the National League (NL) and the American League (AL)? 
+--Give their full name and the teams that they were managing when they won the award.
 SELECT *
 FROM people;
 
@@ -68,23 +69,95 @@ SELECT *
 FROM teams;
 
 WITH managing_team AS (SELECT name
-					   FROM teams)
-SELECT p.namefirst, p.namelast, p.namegiven
-FROM people AS p FULL JOIN awardsmanagers AS awards
+					   FROM teams) 
+SELECT p.namefirst, p.namelast, p.namegiven 
+FROM people AS p INNER JOIN awardsmanagers AS awards
                  ON p.playerid = awards.playerid
-WHERE awardid = 'TSN Manager of the Year'
-AND lgid = 'AL AND NL'
+WHERE awards.awardid = 'TSN Manager of the Year'
+AND lgid = 'AL' OR lgid = 'NL';
+
+
+SELECT CONCAT(p.namefirst,' ' ,p.namelast), t.name AS team_name
+FROM people AS p INNER JOIN awardsmanagers AS awards
+                 ON p.playerid = awards.playerid
+				 INNER JOIN appearances AS appear
+				 ON p.playerid = appear.playerid
+				 INNER JOIN teams AS t
+				 ON appear.teamid = t.teamid
+WHERE awards.awardid = 'TSN Manager of the Year'
+					 AND awards.lgid = 'AL' OR awards.lgid ='NL';
 
 
 
+WITH award_AL AS (SELECT DISTINCT playerid, awardid, lgid
+					 FROM awardsmanagers
+					 WHERE awardid = 'TSN Manager of the Year'
+					 AND (awardsmanagers.lgid = 'AL')),
+award_NL AS (SELECT DISTINCT playerid,awardid, lgid 
+					 FROM awardsmanagers
+					 WHERE awardid = 'TSN Manager of the Year'
+					 AND (awardsmanagers.lgid = 'NL'))					
+SELECT CONCAT(p.namefirst, '  ' ,p.namelast), t.name AS team_name
+FROM award_AL  INNER JOIN award_NL USING (playerid)
+				 INNER JOIN awardsmanagers AS awards USING (playerid)
+				 INNER JOIN teams AS t ON awards.yearid = t.yearid
+				 INNER JOIN people AS p ON awards.playerid = p.playerid;
+
+				 
+WITH award_AL AS (SELECT DISTINCT playerid, awardid, lgid
+					 FROM awardsmanagers
+					 WHERE awardid = 'TSN Manager of the Year'
+					 AND (awardsmanagers.lgid = 'AL')),
+award_NL AS (SELECT DISTINCT playerid,awardid, lgid 
+					 FROM awardsmanagers
+					 WHERE awardid = 'TSN Manager of the Year'
+					 AND (awardsmanagers.lgid = 'NL'))					
+SELECT CONCAT(p.namefirst, '  ' ,p.namelast), t.name AS team_name
+FROM award_AL INNER JOIN award_NL USING (playerid)
+				 INNER JOIN awardsmanagers AS awards USING (playerid)
+				 INNER JOIN teams AS t ON awards.yearid = t.yearid
+				 INNER JOIN people AS p ON awards.playerid = p.playerid
+WHERE awards.awardid = 'TSN Manager of the Year'				 
+		 AND (awards.lgid = 'AL') OR (awards.lgid = 'NL');		 
 
 
-SELECT p.namefirst, p.namelast, p.namegiven, t.name
-FROM people AS p FULL JOIN awardsmanagers AS awards
-                 ON people.playerid = awardsmanagers.playerid
-				 ON people.playerid = appearances.playerid
-				 ON appearances.teamid = teams.teamid
-GROUP BY p.namefirst, p.namelast, p.namegiven, t.name;
+
+WITH award_AL AS (SELECT DISTINCT playerid, awardid, lgid
+					 FROM awardsmanagers
+					 WHERE awardid = 'TSN Manager of the Year'
+					 AND (awardsmanagers.lgid = 'AL')),
+award_NL AS (SELECT DISTINCT playerid,awardid, lgid 
+					 FROM awardsmanagers
+					 WHERE awardid = 'TSN Manager of the Year'
+					 AND (awardsmanagers.lgid = 'NL'))
+SELECT CONCAT(p.namefirst, '  ' ,p.namelast), t.name AS team_name,
+				CASE WHEN awards.awardid = 'TSN Manager of the Year' THEN awards.lgid = 'NL' END; 
+                 
+FROM award_AL INNER JOIN award_NL USING (playerid)
+				 INNER JOIN awardsmanagers AS awards USING (playerid)
+				 INNER JOIN teams AS t ON awards.yearid = t.yearid
+				 INNER JOIN people AS p ON awards.playerid = p.playerid
+CASE WHEN awardid = 'TSN Manager of the Year' THEN awards.lgid = 'NL' END AS total_pop_2010;
+ 
+--Final Answer
+WITH award_AL AS (SELECT DISTINCT playerid, yearid, lgid
+					 FROM awardsmanagers
+					 WHERE awardid = 'TSN Manager of the Year'
+					 AND (awardsmanagers.lgid = 'AL')),
+award_NL AS (SELECT DISTINCT playerid, yearid, lgid
+					 FROM awardsmanagers
+					 WHERE awardid = 'TSN Manager of the Year'
+					 AND (awardsmanagers.lgid = 'NL'))	
+SELECT DISTINCT CONCAT(people.namefirst, ' ' ,people.namelast) AS manager_name,
+				teams.name AS team_name,
+				award_AL.yearid AS AL_yearid,
+				award_NL.yearid AS NL_yearid
+	  FROM award_AL INNER JOIN award_NL ON award_NL.playerid = award_AL.playerid
+	  				INNER JOIN people ON people.playerid = award_AL.playerid
+					INNER JOIN managers ON managers.playerid = award_AL.playerid AND (managers.yearid = award_AL.yearid OR managers.yearid = award_NL.yearid)
+					INNER JOIN teams on teams.teamid = managers.teamid AND (teams.yearid = award_AL.yearid OR teams.yearid = award_NL.yearid);
+
+
 
 
 
