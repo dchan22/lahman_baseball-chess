@@ -4,11 +4,11 @@
 SELECT DISTINCT p.namefirst, 
 				p.namelast, 
 				p.namegiven, 
-				p.height, 
-				a.playerid, 
-				t.name
+				p.height,  
+				a.g_all AS total_games_played,
+				t.name			
 FROM people AS p 
 		LEFT JOIN appearances AS a ON a.playerid = p.playerid
 		LEFT JOIN teams AS t ON t.teamid = a.teamid
 WHERE height IN(SELECT MIN(height)
-				FROM people)
+				FROM people);
