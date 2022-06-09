@@ -20,7 +20,7 @@ FROM batting  INNER JOIN career_hr ON batting.playerid = career_hr.playerid
 WHERE yearid = 2016
 AND hr >= 1
 AND years_in_lg >= 10
-ORDER BY high_hr DESC
+ORDER BY high_hr DESC;
 
 
 
